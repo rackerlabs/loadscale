@@ -19,7 +19,6 @@ Configure the locustfile.py included or just the barebones I provided to run [Lo
 3. Type in whatever you want for number of users and onboarding speed
 
 ##Current Assumptions
-1. Load balancer is rackspace owned
-2. only one loadbalancer 
-3. all the same type of nodes in scaling group (which it most likely should be already)
-4. load balancer algorithm lends itself to be such that it balances itself out across servers.
+1. only one loadbalancer 
+2. all the same type of nodes in scaling group (which it most likely should be already)
+3. load balancer algorithm lends itself to be such that it balances itself out across servers.
