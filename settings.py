@@ -23,3 +23,4 @@ AUTO_SCALE_NAME = "Group01"
 
 
 # LOAD BALANCER IP ADDRESS
+LOAD_BAL_IP_ADDR = "http://**.***.**.**"
