@@ -1,6 +1,4 @@
 from locust import HttpLocust, TaskSet
-import settings
-
 
 def index(l):
     l.client.get("/")
@@ -13,7 +11,7 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    host = settings.LOAD_BAL_IP_ADDR
+    host = "http://23.253.121.59"
     min_wait=2000
     max_wait=3000
 

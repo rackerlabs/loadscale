@@ -12,19 +12,19 @@ cs = pyrax.cloudservers
 au = pyrax.autoscale
 
 # name of adding on server policy:
-ADD_ON_POLICY = settings.ADD_ON_POLICY
-SUB_OFF_POLICY = settings.SUB_OFF_POLICY
+ADD_ON_POLICY = settings["ADD_ON_POLICY"]
+SUB_OFF_POLICY = settings["SUB_OFF_POLICY"]
 
 # set max number of mconnections per server. If goes up, then add in a new server
-MAX_CONN = settings.MAX_CONN
+MAX_CONN = settings["MAX_CONN"]
 # set min number of connections per server. If goes below, then kill a server
-MIN_CONN = settings.MIN_CONN
+MIN_CONN = settings["MIN_CONN"]
 
 # load balancer name
-LOAD_BAL_NAME = settings.LOAD_BAL_NAME
+LOAD_BAL_NAME = settings["LOAD_BAL_NAME"]
 
 # autoscaling Group name
-AUTO_SCALE_NAME = settings.AUTO_SCALE_NAME
+AUTO_SCALE_NAME = settings["AUTO_SCALE_NAME"]
 
 
 def get_load_bal(clb):
