@@ -6,14 +6,15 @@ settings = {}
 settings["MAX_CONN"] = 50
 settings["MIN_CONN"] = 40
 
-# Name of the scaling up and scaling down policies (only support 1 of each right now)
+# Name of the scaling up and scaling down policies (only support 1 of each
+# right now)
 settings["ADD_ON_POLICY"] = "add_on"
 settings["SUB_OFF_POLICY"] = "remove_1"
 
 # name of rackspace cred. file with path:
 from os.path import expanduser
 home_dir = expanduser("~")
-settings["RACK_CRED_FILE"] = home_dir+"/.rackspace_cred"
+settings["RACK_CRED_FILE"] = home_dir + "/.rackspace_cred"
 
 # name of load balancer (only support one right now)
 settings["LOAD_BAL_NAME"] = "load_balancer"
@@ -23,4 +24,4 @@ settings["AUTO_SCALE_NAME"] = "Group01"
 
 
 # LOAD BALANCER IP ADDRESS
-settings["LOAD_BAL_IP_ADDR"] ="http://23.253.121.59"
+settings["LOAD_BAL_IP_ADDR"] = "http://23.253.121.59"
