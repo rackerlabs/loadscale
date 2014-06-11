@@ -1,10 +1,12 @@
+from settings import settings
+
 import time
 import pyrax
 import datetime as dt
-import settings
+
 
 #authenticate the user
-pyrax.set_credential_file(settings.RACK_CRED_FILE)
+pyrax.set_credential_file(settings["RACK_CRED_FILE"])
 
 # shorten the variables - make shortcuts
 clb = pyrax.cloud_loadbalancers
@@ -26,80 +28,153 @@ LOAD_BAL_NAME = settings["LOAD_BAL_NAME"]
 # autoscaling Group name
 AUTO_SCALE_NAME = settings["AUTO_SCALE_NAME"]
 
+###### GETTERS #######
 
 def get_load_bal(clb):
+	"""
+	Gets the load balancer based on the name set in the settings file
+	"""
 	for load_bal in clb.list():
 		if LOAD_BAL_NAME == load_bal.name:
 			return load_bal
 	raise Exception("load balancer not found")
 
 
-
 def get_au_scale_group(au):
+	"""
+	Returns the autoscaling group based on the name that is defined in the settings
+	"""
 	for sg in au.list():
 		if AUTO_SCALE_NAME == sg.name:
 			return sg
 	raise Exception("auto scaling group was not found")
 
 
+def get_total_connections(load_bal):
+	"""
+	Given load balancer, this returns the total number of connections the load balancer has cached every 5 minutes
+	"""
+	currentConn =  load_bal.manager.get_stats(load_bal.id)['currentConn']
+	currentConnSsl = load_bal.manager.get_stats(load_bal.id)['currentConnSsl']
+	return currentConn + currentConnSsl
+
+def get_total_nodes(load_bal):
+	"""
+	Returns the number of nodes attached to the load balancer regardless of if they are in the scaling group or not
+	"""
+	return len(get_load_bal(clb).nodes)
+
+def get_scaling_active_nodes(sg):
+	"""
+	Returns the number of active connections associated with a scaling group
+	Note: this() != get_total_connections
+	"""
+	return sg.get_state()["active_capacity"]
+
+def get_scaling_desired_nodes(sg):
+	"""
+	Returns the number of desired nodes the scaling group will want in a short while
+	"""
+	return sg.get_state()["desired_capacity"]
+
+######## LOGIC ##########
+
+def out_of_range(totalConn, current_number_of_nodes):
+	"""
+	Checks if the total number of connections is out of range. 
+	Returns: 
+	- False --> is in range
+	- "scale_up" --> need to execute scale up policy 
+	- "scale_down" --> need to execute scale down policy
+	"""
+	if (totalConn+0.0)/current_number_of_nodes > MAX_CONN:
+		return "scale_up"
+	elif (totalConn+0.0)/current_number_of_nodes < MIN_CONN:
+		return "scale_down"
+	else:
+		return False
+
+
+def execute_policy(pol):
+	"""
+	Executes a given policy. 
+	Returns:
+	True - if executed correctly
+	False - if there was an error
+	"""
+	try:
+		pol.execute()
+		print "Policy <", pol.name, "> has been execueted"
+		return True
+	except:
+		print "can't carry out policy: ", pol.name 
+		return False
+
+
+def scaling(load_bal, sg):
+	"""
+	Based on parameters, checks if the group needs to scale
+	Returns:
+	False -- if it did not execute a policy
+	True -- if it did execuete a policy
+	"""
+	totalConn = get_total_connections(load_bal)
+	print "TOTAL CONNECTIONS - " , totalConn
+
+	current_number_of_nodes = get_total_nodes(load_bal)
+	print "Current number of nodes: ", current_number_of_nodes
+
+	scaling = out_of_range(totalConn, current_number_of_nodes)
+
+	if not scaling:
+		print "In range of connections -- no need to scale right now"
+		return False
+	else:
+		au_active_nodes = get_scaling_active_nodes(sg)
+		au_desired_nodes = get_scaling_desired_nodes(sg)
+		if au_active_nodes == au_desired_nodes:
+			for pol in sg.list_policies():
+				if scaling == "scale_up" and pol.name == ADD_ON_POLICY:
+					# execute scale up policy	
+					return execute_policy(pol)
+				elif scaling == "scale_down" and pol.name == SUB_OFF_POLICY:
+					# execute scale down policy
+					return execute_policy(pol)
+			print "Error in finding the policies to execute"
+			return False
+		else:
+			print "There are stil changes in the nodes to be made. No need to scale right now because creation/deletion still in process"
+			return False
+
 
 def run(): 
-	load_bal = get_load_bal(clb)
 	prev_execute_time = dt.datetime.now()
-	execuetion_locked = False
-	sg = get_au_scale_group(au)
-	cooldown = sg.cooldown # in seconds
+	execuetion_locked = True
+	 # in seconds
 	while True:
-		currentConn =  load_bal.manager.get_stats(load_bal.id)['currentConn']
-		currentConnSsl = load_bal.manager.get_stats(load_bal.id)['currentConnSsl']
-		totalConn = currentConn + currentConnSsl
+		
+		load_bal = get_load_bal(clb)
+		sg = get_au_scale_group(au)
+		cooldown = sg.cooldown
 
-		print "TOTAL CONNECTIONS - " , totalConn
-
-		# take into account what the cooldown and the prev. policy execuetion
-		execuetion_locked = (prev_execute_time + dt.timedelta(seconds=cooldown)) > (dt.datetime.now())
-
-		if execuetion_locked:
-			print "TIME LEFT until cooldown: ", (prev_execute_time + dt.timedelta(seconds=cooldown)) - dt.datetime.now()
-
-		current_number_of_nodes = len(get_load_bal(clb))
-		print "Current number of nodes: ", current_number_of_nodes
-
-		au_active_nodes = sg.get_state()["active_capacity"]
-		au_desired_nodes = sg.get_state()["desired_capacity"]
-
-		if ((totalConn+0.0)/current_number_of_nodes > MAX_CONN):
-			# scale up 
-			autoscaler_pols = sg.list_policies()
-			for pol in autoscaler_pols:
-				if pol.name == ADD_ON_POLICY and not execuetion_locked and (au_desired_nodes == au_active_nodes):
-					print "executed policy to add on"
-					try:
-						pol.execute()
-						prev_execute_time = dt.datetime.now()
-					except:
-						print "can't carry out policy to add on" # because we hit the limit or other reasons
-					break
-
-		elif ((totalConn+0.0)/current_number_of_nodes < MIN_CONN):
-			# scale down
-			autoscaler_pols = sg.list_policies()
-			for pol in autoscaler_pols:
-				if pol.name == SUB_OFF_POLICY and not execuetion_locked and (au_desired_nodes == au_active_nodes):
-					print "execueted policy to subtract off"
-					try:
-						pol.execute()
-						prev_execute_time = dt.datetime.now()
-					except:
-						print "Can't execute policy subtract off"
-					break
-
+		if not execuetion_locked:
+			it_scaled = scaling(load_bal, sg)
+			if it_scaled:
+				# update the previous time it scaled 
+				prev_execute_time = dt.datetime.now()
 		else:
-			print "Connections is in a good range"
+			print "Cooldown not yet done"
+
 
 		print "Process is going to sleep for 5 minutes"
 		time.sleep(5*60) # load balancer api cache gets updated every 5 minutes so just let this sleep
 		print "Checking the load...."
+
+		# take into account what the cooldown and the prev. policy execuetion
+		execuetion_locked = (prev_execute_time + dt.timedelta(seconds=cooldown)) > (dt.datetime.now())
+		if execuetion_locked:
+			print "TIME LEFT until cooldown: ", (prev_execute_time + dt.timedelta(seconds=cooldown)) - dt.datetime.now()
+
 	
 
 
