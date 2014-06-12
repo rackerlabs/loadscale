@@ -14,6 +14,6 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    host = "http://23.253.121.59"
+    host = "http://**.***.***.**" #put in your ip address here
     min_wait = 2000
     max_wait = 3000

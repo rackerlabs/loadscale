@@ -109,7 +109,7 @@ class test_Everything(unittest.TestCase):
 		# should return a "sub_off"
 		self.assertEquals(ls.scaling(self.load_bal_fake, self.sg), "sub_off")
 
-		# should return a false because we still have stuff in progress
+		# should return a false because we have mismatch in desired vs. active nodes
 		self.sg.desired = 1
 		self.assertFalse(ls.scaling(self.load_bal_fake, self.sg))
 

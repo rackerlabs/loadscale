@@ -5,12 +5,12 @@ import datetime as dt
 
 
 # authenticate the user
-pyrax.set_credential_file(settings["RACK_CRED_FILE"])
+"""pyrax.set_credential_file(settings["RACK_CRED_FILE"])
 
 # shorten the variables - make shortcuts
 clb = pyrax.cloud_loadbalancers
 cs = pyrax.cloudservers
-au = pyrax.autoscale
+au = pyrax.autoscale"""
 
 # name of adding on server policy:
 ADD_ON_POLICY = settings["ADD_ON_POLICY"]
@@ -28,6 +28,17 @@ LOAD_BAL_NAME = settings["LOAD_BAL_NAME"]
 # autoscaling Group name
 AUTO_SCALE_NAME = settings["AUTO_SCALE_NAME"]
 
+
+def authenticate():
+    # authenticate the user
+    pyrax.set_credential_file(settings["RACK_CRED_FILE"])
+
+    # shorten the variables - make shortcuts
+    clb = pyrax.cloud_loadbalancers
+    cs = pyrax.cloudservers
+    au = pyrax.autoscale
+
+    return clb, cs, au
 
 ########## GETTERS #######
 def get_load_bal(clb):
@@ -163,8 +174,15 @@ def run():
     prev_execute_time = dt.datetime.now()
     execuetion_locked = False
     times_checked = 0
-     # in seconds
+    clb, cs, au = authenticate()
     while True:
+        #tokens last one day so check how many times it's been used
+        times_checked = times_checked + 1
+        if times_checked % 250 == 0:
+            # re-authenticate the user because the token would've expired
+            clb, cs, au = authenticate()
+
+
         load_bal = get_load_bal(clb)
         sg = get_au_scale_group(au)
         cooldown = sg.cooldown
@@ -188,16 +206,6 @@ def run():
         execuetion_locked = next_exec_time > (dt.datetime.now())
         if execuetion_locked:
             print "Until cooldown: ", next_exec_time - dt.datetime.now()
-
-        #tokens last one day so check how many times it's been used
-        times_checked += 1
-        if times_checked % 250 == 0:
-            # re-authenticate the user because the token would be up
-            pyrax.set_credential_file(settings["RACK_CRED_FILE"])
-            clb = pyrax.cloud_loadbalancers
-            cs = pyrax.cloudservers
-            au = pyrax.autoscale
-
 
 
 if __name__ == "__main__":
