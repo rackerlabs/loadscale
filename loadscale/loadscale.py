@@ -1,5 +1,4 @@
-from settings import settings
-
+from settings import settings as settings
 import time
 import pyrax
 import datetime as dt
@@ -85,7 +84,7 @@ def get_scaling_desired_nodes(sg):
 
 
 ########## LOGIC ##########
-def out_of_range(totalConn, current_number_of_nodes):
+def out_of_range(totalConn, totalNodes):
     """
     Checks if the total number of connections is out of range.
     Returns:
@@ -93,9 +92,9 @@ def out_of_range(totalConn, current_number_of_nodes):
     - "scale_up" --> need to execute scale up policy
     - "scale_down" --> need to execute scale down policy
     """
-    if (totalConn + 0.0) / current_number_of_nodes > MAX_CONN:
+    if (totalConn + 0.0) / totalNodes > MAX_CONN:
         return "scale_up"
-    elif (totalConn + 0.0) / current_number_of_nodes < MIN_CONN:
+    elif (totalConn + 0.0) / totalNodes < MIN_CONN:
         return "scale_down"
     else:
         return False
@@ -112,7 +111,8 @@ def execute_policy(pol):
         pol.execute()
         print "Policy <", pol.name, "> has been execueted"
         return True
-    except:
+    except Exception, e:
+        print e
         print "can't carry out policy: ", pol.name, " - probably hit min/max"
         return False
 
@@ -127,10 +127,10 @@ def scaling(load_bal, sg):
     totalConn = get_total_connections(load_bal)
     print "TOTAL CONNECTIONS - ", totalConn
 
-    current_number_of_nodes = get_total_nodes(load_bal)
-    print "Current number of nodes: ", current_number_of_nodes
+    totalNodes = get_total_nodes(load_bal)
+    print "Current number of nodes: ", totalNodes
 
-    scaling = out_of_range(totalConn, current_number_of_nodes)
+    scaling = out_of_range(totalConn, totalNodes)
 
     if not scaling:
         print "In range of connections -- no need to scale right now"
