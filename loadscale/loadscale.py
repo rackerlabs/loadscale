@@ -158,10 +158,11 @@ def run():
     Main execuetor of the script.
 
     In general, flow of this script goes upward.
-    (i.e. run()->scaling()->execute_policy()).
+    (i.e. run()->scaling()->execute_policy()-> etc).
     """
     prev_execute_time = dt.datetime.now()
     execuetion_locked = False
+    times_checked = 0
      # in seconds
     while True:
         load_bal = get_load_bal(clb)
@@ -180,13 +181,23 @@ def run():
         # load balancer api cache gets updated every 5 minutes so just let this
         # sleep
         time.sleep(5 * 60)
-        print "Checking the load...."
+        print "Checking the load..."
 
         # take into account what the cooldown and the prev. policy execuetion
         next_exec_time = (prev_execute_time+dt.timedelta(seconds=cooldown))
         execuetion_locked = next_exec_time > (dt.datetime.now())
         if execuetion_locked:
             print "Until cooldown: ", next_exec_time - dt.datetime.now()
+
+        #tokens last one day so check how many times it's been used
+        times_checked += 1
+        if times_checked % 250 == 0:
+            # re-authenticate the user because the token would be up
+            pyrax.set_credential_file(settings["RACK_CRED_FILE"])
+            clb = pyrax.cloud_loadbalancers
+            cs = pyrax.cloudservers
+            au = pyrax.autoscale
+
 
 
 if __name__ == "__main__":

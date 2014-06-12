@@ -84,15 +84,11 @@ class test_Everything(unittest.TestCase):
 		self.assertTrue(ls.execute_policy(pol_fake))
 
 
-	# To better understand what is going on here: open up loadscale.scaling(load_bal, sg)
-	# and look at what I'm patching. Start from bottom up.
-	#@patch("ls.execute_policy", lambda pol: pol.name)
-	#@patch("ls.get_scaling_active_nodes",  lambda sg: sg.get_scaling_active_nodes())
-	#@patch("ls.get_scaling_desired_nodes", lambda sg: sg.get_scaling_desired_nodes())
-	#@patch("ls.get_total_connections", lambda load_bal_fake: self.load_bal_fake.get_total_connections())
-	#@patch("ls.get_total_nodes", lambda load_bal_fake: self.load_bal_fake.get_total_nodes())
+	
 	def test_ScalingLogic(self):
-
+		"""
+		By manipulating certain values we inject in, we can test the main logic of the script
+		"""
 		# patch in all the values and redefine methods
 		ls.MAX_CONN = self.MAX_CONN
 		ls.MIN_CONN = self.MIN_CONN
