@@ -66,7 +66,7 @@ def get_total_nodes(load_bal):
     Returns the number of nodes attached to the load balancer.
     Regardless if they are in the scaling group or not.
     """
-    return len(get_load_bal(clb).nodes)
+    return len(load_bal.nodes)
 
 
 def get_scaling_active_nodes(sg):
