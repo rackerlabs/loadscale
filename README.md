@@ -15,9 +15,11 @@ If import errors arise. Add this repository to your PYTHONPATH. Example: `export
 
 ##Testing
 1. Go to main directory and type in "nosetests"
+2. To get coverage: `nosetests --with-coverage --cover-package=loadscale`
 
+##Load Testing 
 
-##Load Testing (Warning! This will make it work directly with your Rackspace account, incurring costs!):
+(Warning! This will make it work directly with your Rackspace account, incurring costs!):
 Configure the locustfile.py included or just the barebones I provided to run [Locust](http://docs.locust.io/en/latest/). 
 
 1. To run `locust -f locust/locustfile.py`
