@@ -13,6 +13,8 @@ Use autoscale(otter) api and load balancer api to know when to scale. API calls 
 
 If import errors arise. Add this repository to your PYTHONPATH. Example: `export PYTHONPATH=$HOME/loadscale:$PYTHONPATH`
 
+##Testing
+1. Go to main directory and type in "nosetests"
 
 
 ##Load Testing (Warning! This will make it work directly with your Rackspace account, incurring costs!):
