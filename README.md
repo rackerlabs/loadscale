@@ -11,7 +11,7 @@ Use autoscale(otter) api and load balancer api to know when to scale. API calls 
 	2. You need to also create a .pyrax.cfg file [Instructions](https://github.com/rackspace/pyrax/blob/master/docs/getting_started.md#available-configuration-settings). You can look at the example below the graph
 3. To run python script: `python loadscale.py`
 
-If import errors arise. Add this repository to your PYTHONPATH. Example: `export PYTHONPATH=$HOME/loadscale:$PYTHONPATH`
+If import errors arise. Add this repository to your PYTHONPATH. You can add it to your .bash_profile or .bashrc file. Example: `export PYTHONPATH=$HOME/loadscale:$PYTHONPATH`
 
 ##Testing
 1. Go to main directory and type in "nosetests"
@@ -20,10 +20,10 @@ If import errors arise. Add this repository to your PYTHONPATH. Example: `export
 ##Load Testing 
 
 (Warning! This will make it work directly with your Rackspace account, incurring costs!):
-Configure the locustfile.py included or just the barebones I provided to run [Locust](http://docs.locust.io/en/latest/). 
+Configure the locustfile.py or just the barebones I provided to run [Locust](http://docs.locust.io/en/latest/). 
 
 1. To run `locust -f locust/locustfile.py`
-2. Then go to `127.0.0.1:8089`
+2. Then go to `127.0.0.1:8089` in your browser
 3. Type in whatever you want for number of users and onboarding speed
 
 
