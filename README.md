@@ -32,3 +32,8 @@ Configure the locustfile.py or just the barebones I provided to run [Locust](htt
 1. only one loadbalancer 
 2. all the same type of nodes in scaling group (which it most likely should be already)
 3. load balancer algorithm lends itself to be such that it balances itself out across servers.
+
+##Next Steps:
+
+1. automatically detect optimal connections per server based on flavor (perhaps even through Machine Learning? Or creating some sort of apdex metric). For now, you have to set those values in settings.py
+2. Have a better user interface where you can set up account and options. 
