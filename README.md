@@ -37,3 +37,5 @@ Configure the locustfile.py or just the barebones I provided to run [Locust](htt
 
 1. automatically detect optimal connections per server based on flavor (perhaps even through Machine Learning? Or creating some sort of apdex metric). For now, you have to set those values in settings.py
 2. Have a better user interface where you can set up account and options. 
+3. Allow the user to provide a time to wait or have the script run once and kill itself. This way user can control the times they want the script to run rather than having it be an independent process.
+4. Based on user requests, this might become more of a streamlined service application that returns values needed by the user. If, for example, they want something that combines both load balancer and autoscale data then they can use this script.
