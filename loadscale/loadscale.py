@@ -149,6 +149,7 @@ def scaling(load_bal, sg):
     else:
         au_active_nodes = get_scaling_active_nodes(sg)
         au_desired_nodes = get_scaling_desired_nodes(sg)
+        # meaning no create/delete is still happening
         if au_active_nodes == au_desired_nodes:
             for pol in sg.list_policies():
                 if scaling == "scale_up" and pol.name == ADD_ON_POLICY:

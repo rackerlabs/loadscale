@@ -87,7 +87,8 @@ class test_Everything(unittest.TestCase):
 	
 	def test_ScalingLogic(self):
 		"""
-		By manipulating certain values we inject in, we can test the main logic of the script
+		By manipulating values we inject in, we can test the main logic of the script.
+		We inject in Fake* (described below) objects and lambdas 
 		"""
 		# patch in all the values and redefine methods
 		ls.MAX_CONN = self.MAX_CONN
